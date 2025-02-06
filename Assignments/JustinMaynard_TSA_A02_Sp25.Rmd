@@ -22,7 +22,7 @@ When you have completed the assignment, **Knit** the text and code into a single
 
 R packages needed for this assignment:"forecast","tseries", and "dplyr". Install these packages, if you haven't done yet. Do not forget to load them before running your script, since they are NOT default packages.\\
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 #Load/install required package here
 library(forecast)
 library(tseries)
@@ -37,10 +37,12 @@ library(ggplot2)
 
 Consider the data provided in the spreadsheet "Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx" on our **Data** folder. The data comes from the US Energy Information and Administration and corresponds to the December 2023 Monthly Energy Review. The spreadsheet is ready to be used. You will also find a $.csv$ version of the data "Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source-Edit.csv". You may use the function $read.table()$ to import the $.csv$ data in R. Or refer to the file "M2_ImportingData_CSV_XLSX.Rmd" in our Lessons folder for functions that are better suited for importing the $.xlsx$.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 #Importing data set
-data <- read_excel("Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx", skip = 12, col_names = FALSE)
-names <- read_excel("Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx", skip = 10, n_max = 1, col_names = F)
+data <- read_excel("Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx", 
+                   skip = 12, col_names = FALSE)
+names <- read_excel("Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx",
+                    skip = 10, n_max = 1, col_names = F)
 colnames(data) <- names
 
 ```
@@ -50,7 +52,8 @@ colnames(data) <- names
 You will work only with the following columns: Total Biomass Energy Production, Total Renewable Energy Production, Hydroelectric Power Consumption. Create a data frame structure with these three time series only. Use the command head() to verify your data.
 
 ```{r}
-data <- data[,c("Month", "Total Biomass Energy Production", "Total Renewable Energy Production", "Hydroelectric Power Consumption")]
+data <- data[,c("Month", "Total Biomass Energy Production", 
+                "Total Renewable Energy Production", "Hydroelectric Power Consumption")]
 head(data)
 
 ```
@@ -90,11 +93,11 @@ Based on the following plot, hydroelectric power consumption varies mostly seaso
 ```{r}
 
 ggplot(data, aes(x = Month)) + 
-  geom_line(aes(y = `Total Biomass Energy Production`, col = "Total Biomass Energy Production")) +
+  geom_line(aes(y = `Total Biomass Energy Production`, col = "Biomass")) +
   geom_hline(yintercept = mean(data$`Total Biomass Energy Production`), color = 'green') +
-  geom_line(aes(y = `Total Renewable Energy Production`, col = "Total Renewable Energy Production")) +
+  geom_line(aes(y = `Total Renewable Energy Production`, col = "Renewable")) +
   geom_hline(yintercept = mean(data$`Total Renewable Energy Production`), color = 'blue') +
-  geom_line(aes(y = `Hydroelectric Power Consumption`, col = "Hydroelectric Power Consumption")) + 
+  geom_line(aes(y = `Hydroelectric Power Consumption`, col = "Hydroelectric")) + 
   geom_hline(yintercept = mean(data$`Hydroelectric Power Consumption`), color = 'red') +
   xlab("Date") + 
   ylab("Renewable Energy Production (Trillion Btu)") + 

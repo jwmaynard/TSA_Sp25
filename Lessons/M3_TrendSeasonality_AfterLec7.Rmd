@@ -204,7 +204,20 @@ Some test only work for non-seasonal data. So let's create another series with y
 
 ```{r}
 #Group data in yearly steps instances
+#grouping by year removes seasonality
 
+iHP <- 6
+inflow_data_matrix <- matrix(ts_inflow_data[,iHP], byrow = FALSE, nrow = 12)
+inflow_data_yearly <- colMeans(inflow_data_matrix)
+
+my_year <- c(1931:2010)
+
+inflow_data_yearly <- data.frame(my_year, y = inflow_data_yearly)
+
+ggplot(data = inflow_data_yearly, aes(x = my_year, y = y)) +
+  geom_line(color = 'darkgreen') + 
+  geom_smooth(color = 'darkred', method = 'lm') +
+  theme_classic()
 
 ```
 
@@ -219,7 +232,7 @@ Check for deterministic trend.
 
 
 #Use yearly date to run Mann Kendall
-
+summary(MannKendall(inflow_data_yearly$y))
 ```
 
 ### Spearman Correlation test 
@@ -229,9 +242,10 @@ Also check for deterministic trend, for non-seasonal data only.
 ```{r}
 #Deterministic trend with Spearman Correlation Test
 print("Results from Spearman Correlation")
-
+print(cor(inflow_data_yearly$y, my_year, method = "pearson"))
 
 #with cor.test you can get test statistics
+print(cor.test(inflow_data_yearly$y, my_year, method = "spearman"))
 
 ```
 
@@ -242,9 +256,12 @@ Used to detect stochastic trend.
 ```{r}
 #Null hypothesis is that data has a unit root
 print("Results for ADF test/n")
+print(adf.test(ts_inflow_data[,iHP], alternative = "stationary"))
 
 #Now let's try the yearly data
 print("Results for ADF test on yearly data/n")
+print(adf.test(inflow_data_yearly$y, alternative = "stationary"))
+
 
 ```
 
