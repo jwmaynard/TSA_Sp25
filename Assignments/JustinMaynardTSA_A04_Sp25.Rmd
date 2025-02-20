@@ -70,8 +70,11 @@ Try differencing at lag 1 only once, i.e., make `lag=1` and `differences=1`. Plo
 ```{r}
 diff <- diff(x = ts, lag = 1, differences = 1)
 
-autoplot(ts) + 
-autolayer(diff) + theme_classic()
+autoplot(ts, series = 'Original TS') + 
+autolayer(diff, series = 'Differenced TS') + theme_classic() + 
+  ylab("Production (Trillion BTU)") + 
+  ggtitle("Renewable Energy Production") +
+  theme_classic()
 
 ```
 
@@ -122,12 +125,17 @@ autoplot(ts, series = "Original")+
 ### Q4
 Plot the ACF for the three series and compare the plots. Add the argument `ylim=c(-0.5,1)` to the autoplot() or Acf() function - whichever you are using to generate the plots - to make sure all three y axis have the same limits. Looking at the ACF which method do you think was more efficient in eliminating the trend? The linear regression or differencing?
 
-```{r}
-plot_grid(autoplot(Acf(ts,ylim=c(-0.5,1))) + theme_classic() + ggtitle("Original TS"),
-          autoplot(Acf(ts_detrend_renew,ylim=c(-0.5,1)))+ theme_classic() + ggtitle("Detrended TS"),
-          autoplot(Acf(diff,ylim=c(-0.5,1)))+ theme_classic() + ggtitle("Differenced TS"))
+```{r, include=FALSE}
+ts_graph <-autoplot(Acf(ts,ylim=c(-0.5,1))) + theme_classic() + ggtitle("Original TS")
+ts_detrend_graph <-autoplot(Acf(ts_detrend_renew,ylim=c(-0.5,1)))+ theme_classic() + ggtitle("Detrended TS")
+ts_diff_graph <-autoplot(Acf(diff,ylim=c(-0.5,1)))+ theme_classic() + ggtitle("Differenced TS")
 
 ```
+
+```{r}
+plot_grid(ts_graph, ts_detrend_graph, ts_diff_graph)
+```
+
 
 > Answer: The differencing was the most efficient in eliminating the trend, as 
 the ACF values are far lower. The detrended ACF values are not much of an improvement
