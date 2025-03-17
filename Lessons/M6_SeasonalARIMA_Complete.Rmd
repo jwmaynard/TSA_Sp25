@@ -166,7 +166,7 @@ ns_diff <- nsdiffs(ts_electricity_price[,"Residential"])
 cat("Number of seasonal differencing needed: ",ns_diff)
 
 #Lets difference the series once at lag 12 to remove the seasonal trend.
-residential_price_seas_diff <- diff(ts_electricity_price[,"Residential"],lag=12, differences=1) #lag is 11 for seasonal diff
+residential_price_seas_diff <- diff(ts_electricity_price[,"Residential"],lag=12, differences=1)
 residential_price_trend_diff <- diff(ts_electricity_price[,"Residential"],lag =1, differences=1) #diff done on orig series
 residential_price_both_diff <- diff(residential_price_trend_diff,lag =12, differences=1)
 
@@ -219,28 +219,25 @@ plot_grid(
 
 Look at the twice differenced series to identify model order. 
 
-non-seasonal = c(0,1,1) or c(1,1,1)
-seasonal = c(0,1,1)
+Note that we look at the ACF and PACF plot of the differenced series to try to find the order of the model. Here when we look at the first 12 lags for ACF & PACF we don't see slow decays but it looks like we have cut offs at lag 1 on both plots indicating an ARMA(p=1,q=1), and we know from ndiffs that d=1. 
+
+Now let's look at seasonal lags only (12,24,36,48). ACF has one spike at 12 and PACF has 2 spikes one at 12 and one at 24. This is an indication of a seasonal moving average (SMA). Therefore the order of seasonal component is P=0 and Q=1. We know from nsdiffs that D=1.  
 
 ## Manually fitting seasonal ARIMA to original series
 
 ```{r}
-model_ns_111 = Arima(ts_electricity_price[,"Residential"], order = c(0,1,1), include.drift = TRUE)
 
-model_s_011 = Arima(ts_electricity_price[,"Residential"], order = c(0,1,1), seasonal = c(0,1,1), include.drift = FALSE)
-
-plot_grid(
-  autoplot(model_s_011$residuals),
-  autoplot(Acf(model_s_011$residuals,lag.max=40, plot = FALSE)),
-  autoplot(Pacf(model_s_011$residuals,lag.max=40, plot = FALSE)),
-  nrow=1
-)
+SARIMA_manual <- Arima(ts_electricity_price[,"Residential"],
+                       order=c(1,1,1),
+                       seasonal=c(0,1,1),
+                       include.drift=FALSE)
+print(SARIMA_manual)
 
 plot_grid(
-  autoplot(model_s_011$residuals),
-  autoplot(Acf(model_s_011$residuals,lag.max=40, plot = FALSE)),
-  autoplot(Pacf(model_s_011$residuals,lag.max=40, plot = FALSE)),
-  nrow=1
+  autoplot(SARIMA_manual$residuals),
+  autoplot(Acf(SARIMA_manual$residuals,lag.max=40,plot=FALSE),series="Residuals"),
+  autoplot(Pacf(SARIMA_manual$residuals,lag.max=40,plot=FALSE),series="Residuals"),
+  nrow=1,ncol=3
 )
 
 
@@ -250,8 +247,15 @@ plot_grid(
 
 ```{r}
 
-Model_autofit <- auto.arima(deseasonal_residential_price,max.D=0,max.P = 0,max.Q=0)
-print(Model_autofit)
+SARIMA_autofit <- auto.arima(ts_electricity_price[,"Residential"])
+print(SARIMA_autofit)
+
+plot_grid(
+  autoplot(SARIMA_autofit$residuals),
+  autoplot(Acf(SARIMA_autofit$residuals,lag.max=40,plot=FALSE),main=""),
+  autoplot(Pacf(SARIMA_autofit$residuals,lag.max=40,plot=FALSE),main=""),
+  nrow=1,ncol=3
+)
 
 
 ```
@@ -263,7 +267,15 @@ Recall from M6 that the best fit for the non-seasonal time series is a ARIMA(2,1
 
 ```{r}
 
+ARIMA_autofit <- auto.arima(deseasonal_residential_price,max.D=0,max.P = 0,max.Q=0)
+print(ARIMA_autofit)
 
+plot_grid(
+  autoplot(ARIMA_autofit$residuals),
+  autoplot(Acf(ARIMA_autofit$residuals,lag.max=40,plot=FALSE),main=""),
+  autoplot(Pacf(ARIMA_autofit$residuals,lag.max=40,plot=FALSE),main=""),
+  nrow=1,ncol=3
+)
 
 ```
 
